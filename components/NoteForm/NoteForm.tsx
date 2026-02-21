@@ -16,7 +16,8 @@ export default function NoteForm() {
     const id = useId();
     const router = useRouter();
     const queryClient = useQueryClient();
-    const { note, setDraft, clearDraft } = useDraft();
+
+    const { draft, setDraft, clearDraft } = useDraft();
 
     const createMutation = useMutation({
         mutationFn: async (data: NewNote) => {
@@ -24,34 +25,37 @@ export default function NoteForm() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notes'] });
-            clearDraft();
-            cancelForm();
+            clearDraft(); // очищаємо тільки після успішного створення
+            router.back();
         },
     });
 
-    function change(
+    function handleChange(
         ev: React.ChangeEvent<
             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
         >
     ) {
         const updatedDraft: NewNote = {
-            ...note,
+            ...draft,
             [ev.target.name]: ev.target.value,
         };
+
         setDraft(updatedDraft);
     }
 
-    function cancelForm() {
-        router.back();
+    function handleSubmit(formData: FormData) {
+        const newNote: NewNote = {
+            title: formData.get('title') as string,
+            content: formData.get('content') as string,
+            tag: formData.get('tag') as noteTag,
+        };
+
+        createMutation.mutate(newNote);
     }
 
-    function handleSubmit(formDada: FormData) {
-        const newNote: NewNote = {
-            title: formDada.get('title') as string,
-            content: formDada.get('content') as string,
-            tag: formDada.get('tag') as noteTag,
-        };
-        createMutation.mutate(newNote);
+    function cancelForm() {
+        // draft НЕ очищається
+        router.back();
     }
 
     return (
@@ -59,36 +63,36 @@ export default function NoteForm() {
             <div className={css.formGroup}>
                 <label htmlFor={`${id}-title`}>Title</label>
                 <input
-                    onChange={change}
                     type="text"
                     id={`${id}-title`}
                     name="title"
                     className={css.input}
                     required
-                    defaultValue={note.title}
+                    onChange={handleChange}
+                    defaultValue={draft.title}
                 />
             </div>
 
             <div className={css.formGroup}>
                 <label htmlFor={`${id}-content`}>Content</label>
                 <textarea
-                    onChange={change}
                     id={`${id}-content`}
                     name="content"
                     className={css.textarea}
                     rows={8}
-                    defaultValue={note.content}
+                    onChange={handleChange}
+                    defaultValue={draft.content}
                 />
             </div>
 
             <div className={css.formGroup}>
                 <label htmlFor={`${id}-tag`}>Tag</label>
                 <select
-                    onChange={change}
                     id={`${id}-tag`}
                     name="tag"
                     className={css.select}
-                    defaultValue={note.tag}
+                    onChange={handleChange}
+                    defaultValue={draft.tag}
                 >
                     <option value="Todo">Todo</option>
                     <option value="Work">Work</option>
@@ -99,10 +103,18 @@ export default function NoteForm() {
             </div>
 
             <div className={css.actions}>
-                <button onClick={cancelForm} type="button" className={css.cancelButton}>
+                <button
+                    type="button"
+                    onClick={cancelForm}
+                    className={css.cancelButton}
+                >
                     Cancel
                 </button>
-                <button type="submit" className={css.submitButton}>
+
+                <button
+                    type="submit"
+                    className={css.submitButton}
+                >
                     Create note
                 </button>
             </div>
