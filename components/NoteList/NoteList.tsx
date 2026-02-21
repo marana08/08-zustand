@@ -7,16 +7,10 @@ import Link from 'next/link';
 
 interface NoteListProps {
   noteList: Note[];
-  setIsModal: (type: boolean) => void;
-  setTypeModal: (type: 'form' | 'error' | 'create' | 'delete') => void;
-  setMessage: (mes: Note) => void;
 }
 
 export default function NoteList({
-  noteList,
-  setIsModal,
-  setMessage,
-  setTypeModal,
+  noteList
 }: NoteListProps) {
   const queryClient = useQueryClient();
 
@@ -25,11 +19,8 @@ export default function NoteList({
       const res = await deleteNote(id);
       return res;
     },
-    onSuccess: data => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
-      setIsModal(true);
-      setTypeModal('delete');
-      setMessage(data);
     },
   });
 

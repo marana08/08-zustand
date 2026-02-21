@@ -2,7 +2,7 @@
 
 import css from './page.module.css';
 
-import { type Note, type FetchTagNote } from '@/types/note';
+import { type FetchTagNote } from '@/types/note';
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -11,12 +11,8 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
-import Modal from '@/components/Modal/Modal';
-import NoteForm from '@/components/NoteForm/NoteForm';
 import SearchBox from '@/components/SearchBox/SearchBox';
-import CreateMessage from '@/components/CreateMessage/CreateMessage';
-
-type Modal = 'form' | 'error' | 'create' | 'delete';
+import Link from 'next/link';
 
 interface NotesClientProps {
   tag: FetchTagNote;
@@ -24,10 +20,7 @@ interface NotesClientProps {
 
 export default function NotesClient({ tag }: NotesClientProps) {
   const [page, setPage] = useState(1);
-  const [isModal, setIsModal] = useState(false);
   const [word, setWord] = useState('');
-  const [typeModal, setTypeModal] = useState<Modal>('form');
-  const [message, setMessage] = useState<Note | null>(null);
 
   const { data } = useQuery({
     queryKey: ['notes', tag, page, word],
@@ -36,19 +29,6 @@ export default function NotesClient({ tag }: NotesClientProps) {
     refetchOnMount: false,
     throwOnError: true,
   });
-
-  function closeModal() {
-    setIsModal(false);
-  }
-
-  function cancelForm() {
-    setIsModal(false);
-  }
-
-  function createBtn() {
-    setIsModal(true);
-    setTypeModal('form');
-  }
 
   const changeWord = useDebouncedCallback((newWord: string) => {
     const page = 1;
@@ -67,36 +47,11 @@ export default function NotesClient({ tag }: NotesClientProps) {
             setPage={setPage}
           />
         )}
-        <button className={css.toolBtn} onClick={createBtn}>
+        <Link className={css.toolBtn} href={'/notes/action/create'}>
           Create note +
-        </button>
+        </Link>
       </div>
-      {data && data.notes.length > 0 && (
-        <NoteList
-          setIsModal={setIsModal}
-          setMessage={setMessage}
-          setTypeModal={setTypeModal}
-          noteList={data.notes}
-        />
-      )}
-      {isModal && (
-        <Modal onClose={closeModal}>
-          {typeModal === 'form' && (
-            <NoteForm
-              setIsModal={setIsModal}
-              setMessage={setMessage}
-              setTypeModal={setTypeModal}
-              onCancel={cancelForm}
-            />
-          )}
-          {typeModal === 'create' && message && (
-            <CreateMessage note={message} mess="Is created" />
-          )}
-          {typeModal === 'delete' && message && (
-            <CreateMessage note={message} mess="Is deleted" />
-          )}
-        </Modal>
-      )}
+      {data && data.notes.length > 0 && <NoteList noteList={data.notes} />}
     </div>
   );
 }
