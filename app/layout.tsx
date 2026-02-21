@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Roboto } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import './globals.css';
 
 import Header from '@/components/Header/Header';
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Note Hub',
     description: 'My note hub',
-    url: '',
+    url: 'https://08-zustand-weld-eight.vercel.app',
     images: [
       {
         url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
