@@ -16,7 +16,7 @@ interface NotesProps {
 }
 
 interface MetadataProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string[] }>;
 }
 
 export async function generateMetadata({

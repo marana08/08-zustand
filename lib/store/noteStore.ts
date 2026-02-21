@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { NewNote } from '@/types/note';
 
 interface NoteDraftState {
-    note: NewNote;
+    draft: NewNote;
     setDraft: (obj: NewNote) => void;
     clearDraft: () => void;
 }
@@ -16,23 +16,23 @@ const initialDraft: NewNote = {
 
 export const useDraft = create<NoteDraftState>()(
     persist(
-        (set) => ({
-            note: initialDraft,
+        set => ({
+            draft: initialDraft,
 
-            setDraft: (obj) =>
+            setDraft: obj =>
                 set(() => ({
-                    note: obj,
+                    draft: obj,
                 })),
 
             clearDraft: () =>
                 set(() => ({
-                    note: initialDraft,
+                    draft: initialDraft,
                 })),
         }),
         {
             name: 'note-draft',
-            partialize: (state) => ({
-                note: state.note,
+            partialize: state => ({
+                draft: state.draft,
             }),
         }
     )
